@@ -32,8 +32,20 @@ The locations you'd check in the above example are marked here with O where ther
 .#..#...#.#.#..#...#.#.#..#...X.#.#..#...#.#.#..#...#.#.#..#...#.#  --->
 
 Count the number of trees encounted in such diagonal manner.
+
+Part 2:
+
+Determine the number of trees you would encounter if, for each of the following slopes, you start at the top-left corner and traverse the map all the way to the bottom:
+
+    Right 1, down 1.
+    Right 3, down 1. (This is the slope you already checked.)
+    Right 5, down 1.
+    Right 7, down 1.
+    Right 1, down 2.
+
+
 */
-const height = 323
+const height = 323 // determined by a fair dice roll
 
 func main() {
 	file, err := os.Open("input.txt")
@@ -54,14 +66,22 @@ func main() {
 		panic(err)
 	}
 	width := len(slope[0])
-	j := 0
-	treeCount := 0
 
-	for i := 0; i < height; i++ {
-		if slope[i][j] == '#' {
-			treeCount++
+	totalTreeCount := 1
+
+	steps := [][]int{{1, 1}, {1, 3}, {1, 5}, {1, 7}, {2, 1}}
+
+	for _, stepsPair := range steps {
+		stepI, stepJ := stepsPair[0], stepsPair[1]
+		curTreeCount := 0
+		j := 0
+		for i := 0; i < height; i += stepI {
+			if slope[i][j] == '#' {
+				curTreeCount++
+			}
+			j = (j + stepJ) % width
 		}
-		j = (j + 3) % width
+		totalTreeCount *= curTreeCount
 	}
-	fmt.Println(treeCount)
+	fmt.Println(totalTreeCount)
 }
