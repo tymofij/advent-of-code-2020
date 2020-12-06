@@ -1,40 +1,29 @@
 package main
 
 import (
-	"bufio"
-	"fmt"
-	"os"
-	"sort"
+	"io/ioutil"
+	"strings"
 )
 
+// Day5 returns max seat ID for binary space partitioned seats.
+func Day5(seats []string) uint {
+	max := uint(0)
+	for _, seat := range seats {
+		n := uint(0)
+		for i := range seat {
+			n *= 2
+			n += ^((uint(seat[i])) >> 2) & 1
+		}
+		if n > max {
+			max = n
+		}
+	}
+	return max
+}
+
 func main() {
-	file, _ := os.Open("input.txt")
-	defer file.Close()
-	scanner := bufio.NewScanner(file)
+	text, _ := ioutil.ReadFile("input.txt")
+	seats := strings.Fields(string(text))
 
-	seatIds := make([]int, 0, 1000)
-	for scanner.Scan() {
-		line := scanner.Text()
-		seatID := 0
-		for i := 0; i <= 9; i++ {
-			seatID <<= 1
-			var bit int
-			switch line[i] {
-			case 'F', 'L':
-				bit = 0
-			case 'B', 'R':
-				bit = 1
-			}
-			seatID += bit
-		}
-		seatIds = append(seatIds, seatID)
-	}
-	sort.Ints(seatIds)
-	fmt.Println("Max:", seatIds[len(seatIds)-1])
-
-	for i, v := range seatIds {
-		if i > 0 && seatIds[i-1]+1 != v {
-			fmt.Println("Missing:", v-1)
-		}
-	}
+	print(Day5(seats))
 }
