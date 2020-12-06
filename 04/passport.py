@@ -25,8 +25,6 @@ passports = [chunk.split() for chunk in open("input.txt").read().split("\n\n")]
 def is_valid_passport(passport):
   data = dict(line.split(':')  for line in passport)
   for field, func in REQUIRED_FIELDS.items():
-    if field not in data:
-      return False
     try:
       if not func(data[field]):
         return False
