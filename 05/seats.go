@@ -17,7 +17,7 @@ func main() {
 		line := scanner.Text()
 		seatID := 0
 		for i := 0; i <= 9; i++ {
-			seatID = seatID << 1
+			seatID <<= 1
 			var bit int
 			switch line[i] {
 			case 'F', 'L':
@@ -25,7 +25,7 @@ func main() {
 			case 'B', 'R':
 				bit = 1
 			}
-			seatID = (seatID + bit)
+			seatID += bit
 		}
 		seatIds = append(seatIds, seatID)
 	}
