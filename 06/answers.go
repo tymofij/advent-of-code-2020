@@ -6,58 +6,31 @@ import (
 	"strings"
 )
 
-func countUnique(strAnswers string) int {
-	chars := make(map[rune]bool, 30)
-	for _, ans := range strings.Split(strAnswers, "\n") {
-		for _, char := range ans {
-			chars[char] = true
-		}
-	}
-	count := 0
-	for range chars {
-		count++
-	}
-	return count
-}
+func main() {
+	text, _ := ioutil.ReadFile("input.txt")
+	groups := strings.Split(string(text), "\n\n")
+	sumUniques, sumIntersecting := 0, 0
 
-func countIntersecting(strAnswers string) int {
-	answers := strings.Split(strAnswers, "\n")
-	intersectingChars := make(map[rune]bool, 30)
-	for _, a := range answers[0] { // seed with the first word
-		intersectingChars[a] = true
-	}
-	for _, ans := range answers {
-		curChars := make(map[rune]bool, 30)
-		for _, char := range ans {
-			curChars[char] = true
-		}
-		for k := range intersectingChars {
-			if !curChars[k] {
-				delete(intersectingChars, k)
+	for _, group := range groups {
+		counts := make(map[rune]int, 30)
+		answers := strings.Fields(group)
+		groupSize := len(answers)
+
+		for _, answer := range answers {
+			for _, char := range answer {
+				counts[char]++
 			}
 		}
-	}
-	count := 0
-	for range intersectingChars {
-		count++
-	}
-	return count
-}
+		sumUniques += len(counts)
 
-func main() {
-	content, _ := ioutil.ReadFile("input.txt")
-	text := string(content)
-	groupAnswers := strings.Split(text, "\n\n")
-
-	sumUniques := 0
-	for _, groupAnswer := range groupAnswers {
-		sumUniques += countUnique(groupAnswer)
+		intersecting := 0
+		for char := range counts {
+			if counts[char] == groupSize {
+				intersecting++
+			}
+		}
+		sumIntersecting += intersecting
 	}
 	fmt.Println(sumUniques)
-
-	sumIntersecting := 0
-	for _, groupAnswer := range groupAnswers {
-		sumIntersecting += countIntersecting(groupAnswer)
-	}
 	fmt.Println(sumIntersecting)
 }
