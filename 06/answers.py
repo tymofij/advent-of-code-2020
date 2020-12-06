@@ -1,15 +1,8 @@
 data = open('input.txt').read()
+groups = [[set(_) for _ in s.split()] for s in data.split('\n\n')]
 
 # Sum of Number of unique answers in each group
-groups = [s.replace('\n', '') for s in data.split('\n\n')]
-print(sum(len(set(g)) for g in groups))
-
-def intersect(*args):
-    res = set(args[0])
-    for a in args:
-        res = res & set(a)
-    return len(res)
+print(sum([len(set.union(*g)) for g in groups]))
 
 # Sum of Number of intersecting answers in each group
-groups = [s.split() for s in data.split('\n\n')]
-print(sum([intersect(*g) for g in groups]))
+print(sum([len(set.intersection(*g)) for g in groups]))
