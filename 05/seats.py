@@ -5,6 +5,7 @@ def get_seat_id(s):
 
 seat_ids = sorted(get_seat_id(s) for s in open('input.txt').readlines())
 print('Max:', max(seat_ids))
+
 for i, v in enumerate(seat_ids):
   if i > 0 and seat_ids[i-1]+1 != v:
     print("Missing:", v-1)
