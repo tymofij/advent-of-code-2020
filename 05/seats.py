@@ -1,7 +1,6 @@
 def get_seat_id(s):
-    row = int(s[:7].replace('F','0').replace('B', '1'), 2)
-    col = int(s[7:].replace('L','0').replace('R', '1'), 2)
-    return row * 8 + col
+  return int(s.replace('F','0').replace('B','1')
+              .replace('L','0').replace('R','1'), 2)
 
 seat_ids = sorted(get_seat_id(s) for s in open('input.txt').readlines())
 print('Max:', max(seat_ids))
