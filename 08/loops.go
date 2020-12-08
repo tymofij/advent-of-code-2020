@@ -18,8 +18,7 @@ func run(code *[]instruction) (acc int, looped bool) {
 	i := 0
 	visited := map[int]bool{}
 	for i < len(*code) {
-		_, ok := visited[i]
-		if ok {
+		if _, ok := visited[i]; ok {
 			return acc, true
 		}
 		visited[i] = true
@@ -50,8 +49,7 @@ func main() {
 	acc, _ := run(&code)
 	fmt.Println("Accumulator at first loop:", acc)
 
-	for i := 0; i < len(code); i++ {
-		instr := code[i]
+	for i, instr := range code {
 		if instr.op == ACC {
 			continue
 		}
