@@ -14,15 +14,15 @@ type instruction struct {
 
 const ACC, NOP, JMP = "acc", "nop", "jmp"
 
-func run(code *[]instruction) (acc int, looped bool) {
+func run(code []instruction) (acc int, looped bool) {
 	i := 0
 	visited := map[int]bool{}
-	for i < len(*code) {
+	for i < len(code) {
 		if _, ok := visited[i]; ok {
 			return acc, true
 		}
 		visited[i] = true
-		instr := (*code)[i]
+		instr := code[i]
 		switch instr.op {
 		case ACC:
 			acc += instr.n
@@ -46,7 +46,7 @@ func main() {
 		code = append(code, instruction{line[0], n})
 	}
 
-	acc, _ := run(&code)
+	acc, _ := run(code)
 	fmt.Println("Accumulator at first loop:", acc)
 
 	for i, instr := range code {
@@ -58,7 +58,7 @@ func main() {
 		} else {
 			code[i].op = NOP
 		}
-		acc, looped := run(&code)
+		acc, looped := run(code)
 		if !looped {
 			fmt.Println("Final accumulator in fixed code:", acc)
 			break
