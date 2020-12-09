@@ -13,6 +13,7 @@ for i in range(PREFIX, len(numbers)):
     if not is_valid(numbers[i-PREFIX: i], numbers[i]):
         X = numbers[i]
         break
+print(X)
 
 for i in range(len(numbers)):
     for j in range(i+2, len(numbers)):
