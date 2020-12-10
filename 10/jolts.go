@@ -13,6 +13,7 @@ var numbers = []int{0}
 var cache = map[int]int64{}
 
 func countWays(nums []int) int64 {
+	// going from right end of the array to the left
 	if len(nums) <= 2 {
 		return 1
 	}
@@ -35,6 +36,29 @@ func countWays(nums []int) int64 {
 	return res
 }
 
+func countWaysNonRecursive(nums []int) int64 {
+	// going from the left to the right
+	var cache = make([]int64, len(nums))
+	var res int64
+	for i, last := range nums {
+		res = 0
+		if i == 0 {
+			res = 1
+		}
+		if i >= 1 && last-nums[i-1] <= 3 {
+			res += cache[i-1]
+		}
+		if i >= 2 && last-nums[i-2] <= 3 {
+			res += cache[i-2]
+		}
+		if i >= 3 && last-nums[i-3] <= 3 {
+			res += cache[i-3]
+		}
+		cache[i] = res
+	}
+	return res
+}
+
 func main() {
 	data, _ := ioutil.ReadFile("input.txt")
 	text := strings.TrimSpace(string(data))
@@ -43,5 +67,6 @@ func main() {
 		numbers = append(numbers, n)
 	}
 	sort.Ints(numbers)
-	fmt.Println(countWays(numbers))
+	// fmt.Println(countWays(numbers))
+	fmt.Println(countWaysNonRecursive(numbers))
 }
