@@ -75,8 +75,7 @@ func nextState(seats [][]byte, tolerance, visibilityLimit int) ([][]byte, bool) 
 }
 
 func occupiedSeatsWhenStabilized(seats [][]byte, tolerance, visibilityLimit int) int {
-	modified := true
-	seats, modified = nextState(seats, tolerance, visibilityLimit)
+	seats, modified := nextState(seats, tolerance, visibilityLimit)
 	for modified {
 		seats, modified = nextState(seats, tolerance, visibilityLimit)
 	}
