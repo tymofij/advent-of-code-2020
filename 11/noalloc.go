@@ -24,13 +24,14 @@ func nextStateNoalloc(seats [][]byte, new [][]byte, tolerance, visibilityLimit i
 }
 
 func occupiedSeatsWhenStabilizedNoalloc(seats [][]byte, tolerance, visibilityLimit int) int {
-	new := make([][]byte, len(seats)) // allocate next step just once
+	rows, cols := len(seats), len(seats[0])
+	new := make([][]byte, rows) // allocate next step just once
 	for i := range new {
-		new[i] = make([]byte, len(seats[0]))
+		new[i] = make([]byte, cols)
 	}
-	prev := make([][]byte, len(seats)) // we will be writing here, do not want to modify the original
+	prev := make([][]byte, rows) // we will be writing here, do not want to modify the original
 	for i := range prev {
-		prev[i] = make([]byte, len(seats[0]))
+		prev[i] = make([]byte, cols)
 		copy(prev[i], seats[i])
 	}
 
