@@ -47,7 +47,8 @@ func show(seats [][]byte) {
 	fmt.Println()
 }
 
-func nextState(seats [][]byte, tolerance, visibilityLimit int) [][]byte {
+func nextState(seats [][]byte, tolerance, visibilityLimit int) ([][]byte, bool) {
+	modified := false
 	rows, cols := len(seats), len(seats[0])
 	new := make([][]byte, rows)
 	for i := range new {
@@ -62,34 +63,22 @@ func nextState(seats [][]byte, tolerance, visibilityLimit int) [][]byte {
 			neighbours := countVisible(seats, i, j, visibilityLimit)
 			if seats[i][j] == EMPTY && neighbours == 0 {
 				new[i][j] = TAKEN
+				modified = true
 			}
 			if seats[i][j] == TAKEN && neighbours >= tolerance {
 				new[i][j] = EMPTY
+				modified = true
 			}
 		}
 	}
-	return new
-}
-
-func equal(a, b [][]byte) bool {
-	rows, cols := len(a), len(a[0])
-	for i := 0; i < rows; i++ {
-		for j := 0; j < cols; j++ {
-			if a[i][j] != b[i][j] {
-				return false
-			}
-		}
-	}
-	return true
+	return new, modified
 }
 
 func occupiedSeatsWhenStabilized(seats [][]byte, tolerance, visibilityLimit int) int {
-	prevSeats := seats
-	seats = nextState(seats, tolerance, visibilityLimit)
-	for !equal(seats, prevSeats) {
-		// show(seats)
-		prevSeats = seats
-		seats = nextState(seats, tolerance, visibilityLimit)
+	modified := true
+	seats, modified = nextState(seats, tolerance, visibilityLimit)
+	for modified {
+		seats, modified = nextState(seats, tolerance, visibilityLimit)
 	}
 
 	res := 0
