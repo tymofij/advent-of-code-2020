@@ -47,13 +47,9 @@ func show(seats [][]byte) {
 	fmt.Println()
 }
 
-func nextState(seats [][]byte, tolerance, visibilityLimit int) ([][]byte, bool) {
+func nextState(seats [][]byte, new [][]byte, tolerance, visibilityLimit int) bool {
 	modified := false
 	rows, cols := len(seats), len(seats[0])
-	new := make([][]byte, rows)
-	for i := range new {
-		new[i] = make([]byte, cols)
-	}
 	for i := 0; i < rows; i++ {
 		for j := 0; j < cols; j++ {
 			new[i][j] = seats[i][j]
@@ -71,14 +67,23 @@ func nextState(seats [][]byte, tolerance, visibilityLimit int) ([][]byte, bool) 
 			}
 		}
 	}
-	return new, modified
+	return modified
 }
 
+// avoid memory allocations at the cost of rewriting `seats` contents.
+// surprisingly does not yield any speedups
 func occupiedSeatsWhenStabilized(seats [][]byte, tolerance, visibilityLimit int) int {
 	modified := true
-	seats, modified = nextState(seats, tolerance, visibilityLimit)
+	new := make([][]byte, len(seats)) // allocate next step just once
+	for i := range new {
+		new[i] = make([]byte, len(seats[0]))
+	}
+
+	modified = nextState(seats, new, tolerance, visibilityLimit)
 	for modified {
-		seats, modified = nextState(seats, tolerance, visibilityLimit)
+		seats, new = new, seats // updating the state of seats to newer one, setting up new for reuse
+		// show(seats)
+		modified = nextState(seats, new, tolerance, visibilityLimit)
 	}
 
 	res := 0
@@ -100,5 +105,10 @@ func main() {
 		seats = append(seats, []byte(line))
 	}
 	fmt.Println("part 1:", occupiedSeatsWhenStabilized(seats, 4, 1))
+
+	seats = [][]byte{}
+	for _, line := range strings.Split(text, "\n") {
+		seats = append(seats, []byte(line))
+	}
 	fmt.Println("part 2:", occupiedSeatsWhenStabilized(seats, 5, -1))
 }
