@@ -64,5 +64,5 @@ def occupied_seats_when_stabilized(seats, tolerance, visibility_limit=None):
                 res += 1
     return res
 
-print("part 1", occupied_seats_when_stabilized(seats, 4, 1))
-print("part 2", occupied_seats_when_stabilized(seats, 5))
+print("part 1:", occupied_seats_when_stabilized(seats, 4, 1))
+print("part 2:", occupied_seats_when_stabilized(seats, 5))
