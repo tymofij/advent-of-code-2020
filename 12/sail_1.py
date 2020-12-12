@@ -4,7 +4,7 @@ data = [(s[0], int(s[1:])) for s in open('input.txt').readlines()]
 
 x = 0
 y = 0
-angle = 0
+angle = 0  # in degrees
 for rule, n in data:
     if rule == 'N':
         y += n
@@ -15,8 +15,6 @@ for rule, n in data:
     elif rule == 'W':
         x -= n
     elif rule == 'F':
-        angle += 360
-        angle = angle % 360
         rad = (math.pi * angle) / 180
         x += n * math.cos(rad)
         y += n * math.sin(rad)
