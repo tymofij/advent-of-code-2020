@@ -21,7 +21,7 @@ for rule, n in data:
         x += dx * n
         y += dy * n
     elif rule in ('L', 'R'):
-        d_rad = (math.pi * n) / 180
+        d_rad = math.radians(n)
         radius = math.sqrt(dx**2 + dy**2)
         if rule == 'R':
             d_rad *= -1

@@ -15,6 +15,14 @@ type instruction struct {
 
 var rules = []instruction{}
 
+func manhattanDistance(x, y float64) int {
+	return int(math.Round(math.Abs(x) + math.Abs(y)))
+}
+
+func radians(deg float64) float64 {
+	return math.Pi * deg / 180
+}
+
 func getFinalManhattanDistance(data []instruction) int {
 	var x, y float64
 	var angle float64 // in degrees
@@ -34,17 +42,17 @@ func getFinalManhattanDistance(data []instruction) int {
 		case 'R':
 			angle -= n
 		case 'F':
-			rad := (math.Pi * angle) / 180
+			rad := radians(angle)
 			x += n * math.Cos(rad)
 			y += n * math.Sin(rad)
 		}
 	}
-	return int(math.Round(math.Abs(x) + math.Abs(y)))
+	return manhattanDistance(x, y)
 }
 
 func getFinalManhattanDistanceWithWaypoint(data []instruction) int {
 	var x, y float64
-	var dx, dy float64 = 10, 1
+	var dx, dy float64 = 10, 1 // waypoint offset relative to the ship position
 	for _, instr := range data {
 		n := float64(instr.n)
 		switch instr.rule {
@@ -60,17 +68,17 @@ func getFinalManhattanDistanceWithWaypoint(data []instruction) int {
 			x += n * dx
 			y += n * dy
 		case 'L', 'R':
-			turnAngle := (math.Pi * n) / 180
-			radius := math.Sqrt(dx*dx + dy*dy)
+			turnAngle := radians(n)
 			if instr.rule == 'R' {
 				turnAngle *= -1
 			}
 			rad := math.Atan2(dy, dx) + turnAngle
+			radius := math.Sqrt(dx*dx + dy*dy)
 			dy = radius * math.Sin(rad)
 			dx = radius * math.Cos(rad)
 		}
 	}
-	return int(math.Round(math.Abs(x) + math.Abs(y)))
+	return manhattanDistance(x, y)
 }
 
 func main() {

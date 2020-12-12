@@ -15,7 +15,7 @@ for rule, n in data:
     elif rule == 'W':
         x -= n
     elif rule == 'F':
-        rad = (math.pi * angle) / 180
+        rad = math.radians(angle)
         x += n * math.cos(rad)
         y += n * math.sin(rad)
     elif rule == 'L':
