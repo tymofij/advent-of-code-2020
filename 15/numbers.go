@@ -16,7 +16,7 @@ func main() {
 	turn := len(data)
 
 	var next int
-	for turn < 30000000 {
+	for turn < 30_000_000 {
 		prevTurn, ok := lastSpoken[prev]
 		if ok {
 			next = turn - prevTurn
