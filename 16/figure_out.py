@@ -2,6 +2,10 @@
 from data import rules, your_ticket, nearby_tickets
 from collections import defaultdict
 
+"""
+I'm not proud of this code
+"""
+
 
 def is_valid(ticket):
     for n in ticket:
