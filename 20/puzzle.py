@@ -1,7 +1,9 @@
 from pprint import pprint
-import sys
+import math, sys
 
-def to_struct(top, left, right, bottom):
+VARIATIONS = 12
+
+def to_struct(top, right, bottom, left):
     return {
         'top': top,
         'left': left,
@@ -15,13 +17,15 @@ def rotations(a, b, c, d):
     yield c, d, a, b
     yield d, a, b, c
 
-def flips(a, b, c, d):
-    yield from rotations(a, b, c, d) # norm
-    yield from rotations(d, b[::-1], c[::-1], a) # top with bottom
-    yield from rotations(a[::-1], c, b, d[::-1]) # left and right
+def flips(top, right, bottom, left):
+    yield from rotations(top, right, bottom, left) # norm
+    # vertical: replace top with bottom
+    yield from rotations(bottom, right[::-1], top, left[::-1])
+    # horizontal: replace left with right
+    yield from rotations(top[::-1], left, bottom[::-1], right)
 
 tiles = {}
-for data in open("input.txt").read().split('\n\n'):
+for data in open("demo.txt").read().split('\n\n'):
     lines = data.split('\n')
     n = int(lines[0][-5:-1])
     data = lines[1:]
@@ -29,69 +33,101 @@ for data in open("input.txt").read().split('\n\n'):
     bottom = data[-1]
     left = ''.join([line[0] for line in data])
     right = ''.join([line[-1] for line in data])
-    tiles[n] = [to_struct(*variant) for variant in flips(top, left, right, bottom)]
+    tiles[n] = [to_struct(*variant) for variant in flips(top, right, bottom, left)]
 
+SIZE = round(math.sqrt(len(tiles)))
 
-def stitch(left_tile, top_tile):
+def stitch(left_tile, top_tile, exclude_tiles):
     # finds tile which fits to the right of this one
+    res = []
     for n in tiles.keys():
-        if n in used_tiles:
+        if n in exclude_tiles:
             continue
-        for v in range(12):
+        for v in range(VARIATIONS): # variations
             fit = True
             if left_tile and tiles[n][v]['left'] != left_tile['right']:
                 fit = False
             if top_tile and tiles[n][v]['top'] != top_tile['bottom']:
                 fit = False
             if fit:
-                used_tiles.add(n)
-                return n, v
-    return None
+                res.append([n, v])
+    return res
 
-def get_tile(n_v):
-    n, v = n_v
-    return tiles[n][v]
+def get_tile(link):
+    if link is None:
+        return None
+    return tiles[link['n']][link['v']]
 
 
-max_done = 0
-for n in tiles.keys():
-    for v in range(12):
-        print(n, v)
-        top_left = n, v
-        used_tiles = set({n})
-        matrix = [[top_left]] # matrix of 12x12, each element a tuple of (tile_n, variant_n)
-        done = False
-        for j in range(1, 12):
-            next_tile_nv = stitch(get_tile(matrix[0][j-1]), None)
-            if next_tile_nv:
-                matrix[0].append(next_tile_nv)
-            else:
-                done = True
-                break
-        if done:
-            continue # we could not even finish the first row
-        for i in range(1, 12):
-            if done:
-                break
-            next_tile_nv = stitch(None, get_tile(matrix[i-1][0]))
-            if next_tile_nv:
-                matrix.append([next_tile_nv])
-            else:
-                done = True
-                break
-            for j in range(1, 12):
-                next_tile_nv = stitch(get_tile(matrix[i][j-1]), get_tile(matrix[i-1][j]))
-                if next_tile_nv:
-                    matrix[i].append(next_tile_nv)
-                else:
-                    done = True
-                    break
+chain = [{
+    'options': stitch(None, None, {}),
+    'exclude': set(),
+    'n': None, # - to be filled in
+    'v': None, # - to be filled in
+}]
 
-        max_done = max(max_done, len(used_tiles))
-        print(' ', len(used_tiles))
+# m = 0
+# while chain:
+#     print(len(chain))
+#     print('chain', chain)
+#     m = max(m, len(chain))
+#     if len(chain) == SIZE*SIZE:
+#         break # we're done
+#     i = len(chain)  # next elem to assign
+#     cur = chain[i-1]
+#     if not cur['options']:
+#         print('out of options, taking step back')
+#         chain.pop() # step back
+#         continue
+#     n, v = cur['options'].pop()
+#     cur['n'] = n
+#     cur['v'] = v
+#     cur['exclude'] = {n} if i == 1 else chain[i-2]['exclude'] | {n}
+#     print('evaluating', cur)
+#     left = chain[i-1] if i % SIZE != 0 else None
+#     top = chain[i-SIZE] if i >= SIZE else None
+#     next_ones = stitch(get_tile(left), get_tile(top), cur['exclude'])
+#     if next_ones:
+#         print('got options, extending')
+#         chain.append({
+#             'options': next_ones,
+#             'exclude': None,
+#             'n': None, # - to be filled in
+#             'v': None, # - to be filled in
+#         })
+#     else:
+#         print('could not find next tile')
 
-        if len(used_tiles) == 144:
-            print("FUCK YEAH!")
-            sys.exit()
+# print('------')
+# print(m, len(chain))
+# for link in chain:
+#     print(link['n'], link['v'], link['exclude'])
 
-pprint(max_done)
+sol = []
+for triplet in open('sol.txt').read().split('\n\n'):
+    one, two, three = [], [], []
+    for line in triplet.split('\n'):
+        a, b, c = line.split()
+        one.append(a)
+        two.append(b)
+        three.append(c)
+    sol.extend([one, two, three])
+
+for data in sol:
+    top = data[0]
+    bottom = data[-1]
+    left = ''.join([line[0] for line in data])
+    right = ''.join([line[-1] for line in data])
+    found = False
+    for n in tiles.keys():
+        for v in range(VARIATIONS):
+            t = tiles[n][v]
+            if t['left'] == left and t['right'] == right and t['top'] == top and t['bottom'] == bottom:
+                print('FOUND!')
+                found = True
+    if not found:
+        for line in data:
+            print(line)
+
+
+
