@@ -16,21 +16,18 @@ for triplet in open('sol.txt').read().split('\n\n'):
 i = 0
 for data in sol:
     i +=1
-    top = data[0]
-    bottom = data[-1]
-    left = ''.join([line[0] for line in data])
-    right = ''.join([line[-1] for line in data])
+    for line in data:
+        print(line)
     found = False
     for n in tiles.keys():
         for v in range(VARIATIONS):
             t = tiles[n][v]
-            if t['left'] == left and t['right'] == right and t['top'] == top and t['bottom'] == bottom:
+            if t['matrix'] == data:
                 print(f'demo solution tile {i} fits variant ({n}, {v})')
                 found = True
     if not found:
-        print('unmatched tile:')
-        for line in data:
-            print(line)
+        print('unmatched tile!')
+    print()
+
 
 print('total tiles matched:', i)
-

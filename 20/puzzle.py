@@ -2,8 +2,33 @@ from pprint import pprint
 import math, sys
 
 VARIATIONS = 8
+FILENAME = "input.txt"
+# FILENAME = "demo.txt"
 
-def to_struct(top, right, bottom, left):
+DEBUG = 0
+def log(*args):
+    if DEBUG:
+        print(*args)
+
+
+def rotate(matrix, n):
+    res = matrix
+    for i in range(n):
+        res = list(zip(*res[::-1]))
+    return [
+        ''.join(line) for line in res
+    ]
+
+
+def flip(matrix):
+    return [line[::-1] for line in matrix]
+
+
+def to_struct(matrix):
+    top = matrix[0]
+    bottom = matrix[-1]
+    left = ''.join([line[0] for line in matrix])
+    right = ''.join([line[-1] for line in matrix])
     assert top[0] == left[0]
     assert top[-1] == right[0]
     assert bottom[0] == left[-1]
@@ -13,39 +38,26 @@ def to_struct(top, right, bottom, left):
         'left': left,
         'right': right,
         'bottom': bottom,
+        'matrix': matrix
     }
 
-def rotations(top, right, bottom, left):
-    yield top, right, bottom, left
-    top, right, bottom, left = right, bottom[::-1], left, top[::-1]
-    yield top, right, bottom, left
-    top, right, bottom, left = right, bottom[::-1], left, top[::-1]
-    yield top, right, bottom, left
-    top, right, bottom, left = right, bottom[::-1], left, top[::-1]
-    yield top, right, bottom, left
 
-def flips(top, right, bottom, left):
-    yield from rotations(top, right, bottom, left) # norm
-    # flip horizontal: replace left with right
-    yield from rotations(top[::-1], left, bottom[::-1], right)
-    # flip vertical: replace top with bottom
-    # -- not needed, we achieve all possible combos with horz flip and rotations
-    # yield from rotations(bottom, right[::-1], top, left[::-1])
+def variants(matrix):
+    for i in range(4):
+        yield rotate(matrix, i)
+    flipped = flip(matrix)
+    for i in range(4):
+        yield rotate(flipped, i)
 
 tiles = {}
-for data in open("input.txt").read().split('\n\n'):
+for data in open(FILENAME).read().split('\n\n'):
     lines = data.split('\n')
     n = int(lines[0][-5:-1])
     data = lines[1:]
-    top = data[0]
-    bottom = data[-1]
-    left = ''.join([line[0] for line in data])
-    right = ''.join([line[-1] for line in data])
-    tiles[n] = [to_struct(*variant) for variant in flips(top, right, bottom, left)]
+    tiles[n] = [to_struct(variant) for variant in variants(data)]
 
-print('prepared variants')
 SIZE = round(math.sqrt(len(tiles)))
-
+log('prepared variants')
 
 # precalc tile cache
 for n in tiles.keys():
@@ -56,11 +68,11 @@ for n in tiles.keys():
             if n == nn:
                 continue
             for mm in range(VARIATIONS):
-                if tiles[n][v]['left'] == tiles[nn][mm]['right']:
+                if tiles[n][v]['right'] == tiles[nn][mm]['left']:
                     tiles[n][v]['fit_right'].add((nn, mm))
                 if tiles[n][v]['bottom'] == tiles[nn][mm]['top']:
                     tiles[n][v]['fit_below'].add((nn, mm))
-print('precalculated cache')
+log('precalculated cache')
 
 
 def stitch(left_tile, top_tile, exclude_tiles):
@@ -89,27 +101,23 @@ def get_tile(link):
 
 chain = [{
     'options': stitch(None, None, set()),
+    # 'options': [(1951, 6)],  # to force exactly the answer as in demo solution
     'exclude': set(),
     'n': None, # - to be filled in
     'v': None, # - to be filled in
 }]
 
 
-DEBUG = 0
-def log(*args):
-    if DEBUG:
-        print(*args)
-
-
 max_len = 0
 min_roots = len(chain[0]['options'])
 while chain:
-    if len(chain) > max_len:
-        max_len = len(chain)
-        print(f'longer chain: roots {min_roots}, max chain {max_len}')
-    if len(chain[0]['options']) < min_roots:
-        min_roots = len(chain[0]['options'])
-        print(f'fewer roots:  roots {min_roots}, max chain {max_len}')
+    if DEBUG:
+        if len(chain) > max_len:
+            max_len = len(chain)
+            print(f'longer chain: roots {min_roots}, max chain {max_len}')
+        if len(chain[0]['options']) < min_roots:
+            min_roots = len(chain[0]['options'])
+            print(f'fewer roots:  roots {min_roots}, max chain {max_len}')
 
     log('chain', chain)
     i = len(chain)  # next elem to assign
@@ -142,7 +150,7 @@ while chain:
 
 if DEBUG:
     print('------')
-    print(f'max length {m} out of {len(chain)}')
+    print(f'max length {max_len} out of {len(chain)}')
     for link in chain:
         print(link['n'], link['v'], link['exclude'])
 
