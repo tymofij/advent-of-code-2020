@@ -42,23 +42,41 @@ for data in open("demo.txt").read().split('\n\n'):
     right = ''.join([line[-1] for line in data])
     tiles[n] = [to_struct(*variant) for variant in flips(top, right, bottom, left)]
 
+print('prepared variants')
 SIZE = round(math.sqrt(len(tiles)))
+
+
+# precalc tile cache
+for n in tiles.keys():
+    for v in range(VARIATIONS):
+        tiles[n][v]['fit_right'] = set()
+        tiles[n][v]['fit_below'] = set()
+        for nn in tiles.keys():
+            if n == nn:
+                continue
+            for mm in range(VARIATIONS):
+                if tiles[n][v]['left'] == tiles[nn][mm]['right']:
+                    tiles[n][v]['fit_right'].add((nn, mm))
+                if tiles[n][v]['bottom'] == tiles[nn][mm]['top']:
+                    tiles[n][v]['fit_below'].add((nn, mm))
+print('precalculated cache')
 
 def stitch(left_tile, top_tile, exclude_tiles):
     # finds tile which fits to the right of this one
-    res = []
-    for n in tiles.keys():
-        if n in exclude_tiles:
-            continue
-        for v in range(VARIATIONS): # variations
-            fit = True
-            if left_tile and tiles[n][v]['left'] != left_tile['right']:
-                fit = False
-            if top_tile and tiles[n][v]['top'] != top_tile['bottom']:
-                fit = False
-            if fit:
-                res.append([n, v])
-    return res
+    if left_tile and not top_tile:
+        res = left_tile['fit_right']
+    elif top_tile and not left_tile:
+        res = top_tile['fit_below']
+    elif top_tile and left_tile:
+        fit_left = left_tile['fit_right']
+        fit_below = top_tile['fit_below']
+        res = fit_left & fit_below
+    elif not top_tile and not left_tile:
+        res = []
+        for n in tiles.keys():
+            for v in range(VARIATIONS):
+                res.append((n, v))
+    return [(n, v) for (n, v) in list(res) if n not in exclude_tiles]
 
 def get_tile(link):
     if link is None:
@@ -67,7 +85,7 @@ def get_tile(link):
 
 
 chain = [{
-    'options': stitch(None, None, {}),
+    'options': stitch(None, None, set()),
     'exclude': set(),
     'n': None, # - to be filled in
     'v': None, # - to be filled in
@@ -110,9 +128,9 @@ while chain:
     else:
         log('could not find next tile')
 
-# print('------')
-# print(m, len(chain))
-# for link in chain:
-#     print(link['n'], link['v'], link['exclude'])
+print('------')
+print(f'max length {m} out of {len(chain)}')
+for link in chain:
+    print(link['n'], link['v'], link['exclude'])
 
 print('!!', chain[0]['n'] * chain[-1]['n'] * chain[SIZE-1]['n'] * chain[SIZE*(SIZE-1)]['n'])
