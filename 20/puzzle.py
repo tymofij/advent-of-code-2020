@@ -1,7 +1,7 @@
 from pprint import pprint
 import math, sys
 
-VARIATIONS = 12
+VARIATIONS = 8
 
 def to_struct(top, right, bottom, left):
     assert top[0] == left[0]
@@ -26,13 +26,14 @@ def rotations(top, right, bottom, left):
 
 def flips(top, right, bottom, left):
     yield from rotations(top, right, bottom, left) # norm
-    # vertical: replace top with bottom
-    yield from rotations(bottom, right[::-1], top, left[::-1])
-    # horizontal: replace left with right
+    # flip horizontal: replace left with right
     yield from rotations(top[::-1], left, bottom[::-1], right)
+    # flip vertical: replace top with bottom
+    # -- not needed, we achieve all possible combos with horz flip and rotations
+    # yield from rotations(bottom, right[::-1], top, left[::-1])
 
 tiles = {}
-for data in open("demo.txt").read().split('\n\n'):
+for data in open("input.txt").read().split('\n\n'):
     lines = data.split('\n')
     n = int(lines[0][-5:-1])
     data = lines[1:]
@@ -61,6 +62,7 @@ for n in tiles.keys():
                     tiles[n][v]['fit_below'].add((nn, mm))
 print('precalculated cache')
 
+
 def stitch(left_tile, top_tile, exclude_tiles):
     # finds tile which fits to the right of this one
     if left_tile and not top_tile:
@@ -78,6 +80,7 @@ def stitch(left_tile, top_tile, exclude_tiles):
                 res.append((n, v))
     return [(n, v) for (n, v) in list(res) if n not in exclude_tiles]
 
+
 def get_tile(link):
     if link is None:
         return None
@@ -91,16 +94,24 @@ chain = [{
     'v': None, # - to be filled in
 }]
 
+
 DEBUG = 0
 def log(*args):
     if DEBUG:
         print(*args)
 
-m = 0
+
+max_len = 0
+min_roots = len(chain[0]['options'])
 while chain:
-    log(len(chain))
+    if len(chain) > max_len:
+        max_len = len(chain)
+        print(f'longer chain: roots {min_roots}, max chain {max_len}')
+    if len(chain[0]['options']) < min_roots:
+        min_roots = len(chain[0]['options'])
+        print(f'fewer roots:  roots {min_roots}, max chain {max_len}')
+
     log('chain', chain)
-    m = max(m, len(chain))
     i = len(chain)  # next elem to assign
     cur = chain[i-1]
     if not cur['options']:
@@ -128,9 +139,12 @@ while chain:
     else:
         log('could not find next tile')
 
-print('------')
-print(f'max length {m} out of {len(chain)}')
-for link in chain:
-    print(link['n'], link['v'], link['exclude'])
 
-print('!!', chain[0]['n'] * chain[-1]['n'] * chain[SIZE-1]['n'] * chain[SIZE*(SIZE-1)]['n'])
+if DEBUG:
+    print('------')
+    print(f'max length {m} out of {len(chain)}')
+    for link in chain:
+        print(link['n'], link['v'], link['exclude'])
+
+if chain:
+    print('!!', chain[0]['n'] * chain[-1]['n'] * chain[SIZE-1]['n'] * chain[SIZE*(SIZE-1)]['n'])
