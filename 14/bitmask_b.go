@@ -84,9 +84,7 @@ func main() {
 			val, e := strconv.ParseUint(parsed[1], 10, 64)
 			check(e)
 			maskedKey := applyMask(key, xMask)
-			// fmt.Println("m", maskedKey)
 			for _, p := range permutations(maskedKey) {
-				// fmt.Println(p)
 				k, e := strconv.ParseUint(p, 2, 64)
 				check(e)
 				mem[k] = val
