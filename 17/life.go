@@ -8,7 +8,7 @@ import (
 )
 
 type coord struct {
-	x, y, z int
+	x, y, z, w int
 }
 
 func neighbours(pos coord, data map[coord]bool) int {
@@ -16,12 +16,14 @@ func neighbours(pos coord, data map[coord]bool) int {
 	for dx := -1; dx <= 1; dx++ {
 		for dy := -1; dy <= 1; dy++ {
 			for dz := -1; dz <= 1; dz++ {
-				if dx == 0 && dy == 0 && dz == 0 {
-					continue
-				}
-				has, _ := data[coord{pos.x + dx, pos.y + dy, pos.z + dz}]
-				if has {
-					n++
+				for dw := -1; dw <= 1; dw++ {
+					if dx == 0 && dy == 0 && dz == 0 && dw == 0 {
+						continue
+					}
+					has, _ := data[coord{pos.x + dx, pos.y + dy, pos.z + dz, pos.w + dw}]
+					if has {
+						n++
+					}
 				}
 			}
 		}
@@ -37,14 +39,14 @@ func main() {
 	for i, line := range strings.Split(text, "\n") {
 		for j, char := range []byte(line) {
 			if char == '#' {
-				dots[coord{i, j, 0}] = true
+				dots[coord{i, j, 0, 0}] = true
 			}
 		}
 	}
 
 	for day := 0; day <= 5; day++ {
-		minX, minY, minZ := math.MaxInt32, math.MaxInt32, math.MaxInt32
-		maxX, maxY, maxZ := math.MinInt32, math.MinInt32, math.MinInt32
+		minX, minY, minZ, minW := math.MaxInt32, math.MaxInt32, math.MaxInt32, math.MaxInt32
+		maxX, maxY, maxZ, maxW := math.MinInt32, math.MinInt32, math.MinInt32, math.MinInt32
 		newDots := map[coord]bool{}
 		for k := range dots {
 			if k.x > maxX {
@@ -56,6 +58,9 @@ func main() {
 			if k.z > maxZ {
 				maxZ = k.z
 			}
+			if k.w > maxW {
+				maxW = k.w
+			}
 			if k.x < minX {
 				minX = k.x
 			}
@@ -65,20 +70,26 @@ func main() {
 			if k.z < minZ {
 				minZ = k.z
 			}
+			if k.w < minW {
+				minW = k.w
+			}
+
 		}
 		for x := minX - 1; x <= maxX+1; x++ {
 			for y := minY - 1; y <= maxY+1; y++ {
 				for z := minZ - 1; z <= maxZ+1; z++ {
-					pos := coord{x, y, z}
-					active, _ := dots[pos]
-					n := neighbours(pos, dots)
-					if active == true {
-						if n == 2 || n == 3 {
-							newDots[pos] = true
-						}
-					} else {
-						if n == 3 {
-							newDots[pos] = true
+					for w := minW - 1; w <= maxW+1; w++ {
+						pos := coord{x, y, z, w}
+						active, _ := dots[pos]
+						n := neighbours(pos, dots)
+						if active == true {
+							if n == 2 || n == 3 {
+								newDots[pos] = true
+							}
+						} else {
+							if n == 3 {
+								newDots[pos] = true
+							}
 						}
 					}
 				}
