@@ -33,10 +33,12 @@ func findMatchingBracketPos(runes []rune, startPos int) int {
 }
 
 func main() {
-	s := 0
 	data, _ := ioutil.ReadFile("input.txt")
 	text := strings.TrimSpace(string(data))
-	for _, line := range strings.Split(text, "\n") {
+	lines := strings.Split(text, "\n")
+
+	s := 0
+	for _, line := range lines {
 		s += simpleCalc(line)
 	}
 	fmt.Println(s)
