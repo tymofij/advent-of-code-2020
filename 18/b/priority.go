@@ -11,13 +11,12 @@ import (
 )
 
 func calcExpr(expr interface{}) int {
-	exprType := fmt.Sprintf("%T", expr)
-	switch exprType {
-	case "*ast.BasicLit":
+	switch expr.(type) {
+	case *ast.BasicLit:
 		lit, _ := expr.(*ast.BasicLit)
 		n, _ := strconv.Atoi(lit.Value)
 		return n
-	case "*ast.BinaryExpr":
+	case *ast.BinaryExpr:
 		binExpr, _ := expr.(*ast.BinaryExpr)
 		switch binExpr.Op {
 		case token.QUO: // division, but we know that for us it means addition
@@ -25,7 +24,7 @@ func calcExpr(expr interface{}) int {
 		case token.SUB: // same trick. We just coded multiplication as subtraction
 			return calcExpr(binExpr.X) * calcExpr(binExpr.Y)
 		}
-	case "*ast.ParenExpr":
+	case *ast.ParenExpr:
 		parenExpr := expr.(*ast.ParenExpr)
 		return calcExpr(parenExpr.X)
 	}
