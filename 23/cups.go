@@ -5,112 +5,130 @@ import (
 	"strconv"
 )
 
-var debug bool
+// func log(args ...interface{}) {
+// 	if debug {
+// 		fmt.Println(args...)
+// 	}
+// }
 
-func log(args ...interface{}) {
-	if debug {
-		fmt.Println(args...)
-	}
+type node struct {
+	val  int
+	next *node
 }
 
-func pop(i int, arr []int) (popped int, newArr []int) {
-	if i == len(arr) {
-		popped = arr[0]
-		arr = arr[1:]
-	}
-	if i == len(arr)-1 {
-		popped = arr[i]
-		arr = arr[:i]
-	}
-	if i < len(arr)-1 {
-		popped = arr[i]
-		copy(arr[i:], arr[i+1:])
-		arr = arr[:len(arr)-1]
-	}
-	return popped, arr
-}
-
-func fmtCaps(curCapPos int, arr []int) string {
-	res := ""
-	for i, cup := range arr {
-		if i == curCapPos {
-			res += fmt.Sprintf("(%d) ", cup)
-		} else {
-			res += fmt.Sprintf("%d ", cup)
+func makeCups(s string, size int) *node {
+	var start, prev, cur *node
+	for _, c := range s {
+		v, _ := strconv.Atoi(string(c))
+		cur = &node{v, nil}
+		if start == nil {
+			start = cur
 		}
+		if prev != nil {
+			prev.next = cur
+		}
+		prev = cur
+	}
+	for i := 10; i <= size; i++ {
+		cur = &node{i, nil}
+		prev.next = cur
+		prev = cur
+	}
+	cur.next = start
+	return start
+}
+
+func popThree(start *node) *node {
+	res := start.next
+	start.next = start.next.next.next.next
+	return res
+}
+
+func fmtCups(start *node) string {
+	res := fmt.Sprintf("(%d) ", start.val)
+	var cur *node = start
+	for cur.next != start {
+		cur = cur.next
+		res += fmt.Sprintf("%d ", cur.val)
 	}
 	return res
 }
 
-func find(arr []int, x int) int {
-	for i, elem := range arr {
-		if x == elem {
-			return i
+// return val-1, if val-1 is not in three first elements of excluded list
+// if val-1 < 0, returns nCups
+func getDestVal(val int, excluded *node) int {
+	n := val - 1
+	if n < 1 {
+		n = nCups
+	}
+	for n == excluded.val || n == excluded.next.val || n == excluded.next.next.val {
+		n--
+		if n < 1 {
+			n = nCups
 		}
 	}
-	return -1
+	return n
 }
 
-func insert(arr []int, index int, value int) []int {
-	newArr := append(arr[:index+1], arr[index:]...)
-	newArr[index] = value
-	return newArr
-}
-
-func makeStr(arr []int) string {
-	res := ""
-	oneIdx := find(arr, 1)
-	for i := oneIdx + 1; i < len(arr); i++ {
-		res += strconv.Itoa(arr[i])
-	}
-	for i := 0; i < oneIdx; i++ {
-		res += strconv.Itoa(arr[i])
+func getNode(val int, start *node) *node {
+	res := start
+	for res.val != val {
+		res = res.next
 	}
 	return res
 }
 
-func getDest(val int, arr []int) (destPos int) {
-	destVal := val - 1
-	for find(arr, destVal) == -1 {
-		destVal--
-		if destVal < 0 {
-			for _, elem := range arr {
-				if destVal < elem {
-					destVal = elem
-				}
-			}
-		}
-	}
-	return find(arr, destVal)
+func insertThreeAfter(start, three *node) {
+	afterStart := start.next
+	three.next.next.next = afterStart
+	start.next = three
 }
+
+func strWithoutOne(start *node) string {
+	one := getNode(1, start)
+	cur := one.next
+	res := ""
+	for cur != one {
+		res += strconv.Itoa(cur.val)
+		cur = cur.next
+	}
+	return res
+}
+
+const nCups = 9
+const nMoves = 100
+
+// const nCups = 1_000_000
+// const nMoves = 10_000_000
+
+var debug bool = false
+var cupCache [nCups + 1]*node
 
 func main() {
 	// Demo data
-	// cups := []int{3, 8, 9, 1, 2, 5, 4, 6, 7}
+	// cups := makeCups("389125467", nCups)
 
-	cups := []int{9, 1, 6, 4, 3, 8, 2, 7, 5}
-	var a, b, c int // pick ups
-	curIdx := 0
-	for move := 1; move <= 100; move++ {
-		curVal := cups[curIdx]
-		log(fmt.Sprintf("-- move %d --\ncups: ", move))
-		log(fmtCaps(curIdx, cups))
-		log()
-		a, cups = pop(curIdx+1, cups)
-		curIdx = find(cups, curVal)
-		b, cups = pop(curIdx+1, cups)
-		curIdx = find(cups, curVal)
-		c, cups = pop(curIdx+1, cups)
-		log("pick up:", a, b, c)
-		destIdx := getDest(curVal, cups)
-		log("destination:", cups[destIdx])
-		cups = insert(cups, destIdx+1, a)
-		cups = insert(cups, destIdx+2, b)
-		cups = insert(cups, destIdx+3, c)
-		curIdx = find(cups, curVal)
-		curIdx++
-		curIdx %= len(cups)
-		log()
+	cups := makeCups("916438275", nCups)
+
+	for move := 1; move <= nMoves; move++ {
+		// log(fmt.Sprintf("-- move %d --\ncups: ", move))
+		// log(fmtCups(cups))
+		three := popThree(cups)
+		// log("pick up:", three.val, three.next.val, three.next.next.val)
+		destVal := getDestVal(cups.val, three)
+		// log("destination:", destVal)
+		destNode := getNode(destVal, cups)
+		insertThreeAfter(destNode, three)
+		cups = cups.next
+		// log()
+		if move%1000 == 0 {
+			fmt.Println(move)
+		}
 	}
-	fmt.Println(makeStr(cups))
+	if nCups < 10 {
+		fmt.Println("Cups:", strWithoutOne(cups))
+	}
+	one := getNode(1, cups)
+	fmt.Println("Numbers after one:", one.next.val, one.next.next.val)
+	fmt.Println("Multiple:", one.next.val*one.next.next.val)
 }
