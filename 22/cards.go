@@ -33,8 +33,12 @@ func combat(player1, player2 []int) (winnerDeck []int) {
 	return winnerDeck
 }
 
+var debug bool
+
 func log(args ...interface{}) {
-	// fmt.Println(args...)
+	if debug {
+		fmt.Println(args...)
+	}
 }
 
 type game struct {
@@ -61,7 +65,7 @@ func recursiveCombat(player1, player2 []int) (winner int, winnerDeck []int) {
 		card1 := player1[0]
 		card2 := player2[0]
 		roundKey := fmt.Sprint(player1, player2)
-		seen, _ := seenStates[roundKey]
+		seen := seenStates[roundKey]
 		if seen {
 			log("Reason: Loop")
 			seenGames[gameKey] = game{1, player1}
@@ -80,42 +84,44 @@ func recursiveCombat(player1, player2 []int) (winner int, winnerDeck []int) {
 				winner = 2
 			}
 		} else {
-			winner, _ = recursiveCombat(player1, player2)
+			subdeck1 := make([]int, card1) // Daammmn, should have read the rules more carefully!
+			subdeck2 := make([]int, card2) // it is _not_ the rest of the deck, but only some of it
+			copy(subdeck1, player1)
+			copy(subdeck2, player2)
+			winner, _ = recursiveCombat(subdeck1, subdeck2)
 		}
 		log(fmt.Sprintf("Player %d wins the round!\n", winner))
 		if winner == 1 {
-			player1 = append(player1, card1)
-			player1 = append(player1, card2)
+			player1 = append(player1, card1, card2)
 		} else {
-			player2 = append(player2, card2)
-			player2 = append(player2, card1)
+			player2 = append(player2, card2, card1)
 		}
 		round++
 	}
 	if len(player1) > 0 {
-		seenGames[gameKey] = game{1, player1}
+		seenGames[gameKey] = game{1, []int{}}
 		return 1, player1
 	} else {
-		seenGames[gameKey] = game{2, player2}
+		seenGames[gameKey] = game{2, []int{}}
 		return 2, player2
 	}
 }
 
 func main() {
 	// Demo data
-	player1 := []int{9, 2, 6, 3, 1}
-	player2 := []int{5, 8, 4, 7, 10}
+	// player1 := []int{9, 2, 6, 3, 1}
+	// player2 := []int{5, 8, 4, 7, 10}
 
 	// Loop data
 	// player1 := []int{43, 19}
 	// player2 := []int{2, 29, 14}
 
-	// player1 := []int{44, 31, 29, 48, 40, 50, 33, 14, 10, 30, 5, 15, 41, 45, 12, 4, 3, 17, 36, 1, 23, 34, 38, 16, 18}
-	// player2 := []int{24, 20, 11, 32, 43, 9, 6, 27, 35, 2, 46, 21, 7, 49, 26, 39, 8, 19, 42, 22, 47, 28, 25, 13, 37}
+	player1 := []int{44, 31, 29, 48, 40, 50, 33, 14, 10, 30, 5, 15, 41, 45, 12, 4, 3, 17, 36, 1, 23, 34, 38, 16, 18}
+	player2 := []int{24, 20, 11, 32, 43, 9, 6, 27, 35, 2, 46, 21, 7, 49, 26, 39, 8, 19, 42, 22, 47, 28, 25, 13, 37}
 
-	// winnerDeck := combat(player1, player2)
-	// fmt.Println("Winner score of simple combat:", score(winnerDeck))
-	// fmt.Println()
+	winnerDeck := combat(player1, player2)
+	fmt.Println("Winner score of simple combat:", score(winnerDeck))
+	fmt.Println()
 
 	winner, winnerDeck := recursiveCombat(player1, player2)
 	fmt.Println("Winner of recursive combat:", winner)
