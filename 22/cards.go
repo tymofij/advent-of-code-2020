@@ -42,8 +42,7 @@ func log(args ...interface{}) {
 }
 
 type game struct {
-	winner     int
-	winnerDeck []int
+	winner int
 }
 
 var seenGames = map[string]game{}
@@ -52,7 +51,7 @@ func recursiveCombat(player1, player2 []int) (winner int, winnerDeck []int) {
 	gameKey := fmt.Sprint(player1, player2)
 	gameResult, ok := seenGames[gameKey]
 	if ok {
-		return gameResult.winner, gameResult.winnerDeck
+		return gameResult.winner, []int{}
 	}
 
 	seenStates := map[string]bool{}
@@ -68,7 +67,7 @@ func recursiveCombat(player1, player2 []int) (winner int, winnerDeck []int) {
 		seen := seenStates[roundKey]
 		if seen {
 			log("Reason: Loop")
-			seenGames[gameKey] = game{1, player1}
+			seenGames[gameKey] = game{1}
 			return 1, player1
 		}
 		seenStates[roundKey] = true
@@ -99,10 +98,10 @@ func recursiveCombat(player1, player2 []int) (winner int, winnerDeck []int) {
 		round++
 	}
 	if len(player1) > 0 {
-		seenGames[gameKey] = game{1, []int{}}
+		seenGames[gameKey] = game{1}
 		return 1, player1
 	} else {
-		seenGames[gameKey] = game{2, []int{}}
+		seenGames[gameKey] = game{2}
 		return 2, player2
 	}
 }
