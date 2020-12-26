@@ -11,7 +11,7 @@ func score(winner []int) int {
 
 }
 
-func combat(player1, player2 []int) (winnerDeck []int) {
+func combat(player1, player2 []int) (winner int, winnerDeck []int) {
 	for len(player1) > 0 && len(player2) > 0 {
 		card1 := player1[0]
 		card2 := player2[0]
@@ -27,10 +27,12 @@ func combat(player1, player2 []int) (winnerDeck []int) {
 	}
 	if len(player1) > 0 {
 		winnerDeck = player1
+		winner = 1
 	} else {
+		winner = 2
 		winnerDeck = player2
 	}
-	return winnerDeck
+	return winner, winnerDeck
 }
 
 var debug bool
@@ -51,7 +53,7 @@ func recursiveCombat(player1, player2 []int) (winner int, winnerDeck []int) {
 	gameKey := fmt.Sprint(player1, player2)
 	gameResult, ok := seenGames[gameKey]
 	if ok {
-		return gameResult.winner, []int{}
+		return gameResult.winner, []int{} // must be a sub-game, we do not care about winner's deck here
 	}
 
 	seenStates := map[string]bool{}
@@ -118,13 +120,14 @@ func main() {
 	player1 := []int{44, 31, 29, 48, 40, 50, 33, 14, 10, 30, 5, 15, 41, 45, 12, 4, 3, 17, 36, 1, 23, 34, 38, 16, 18}
 	player2 := []int{24, 20, 11, 32, 43, 9, 6, 27, 35, 2, 46, 21, 7, 49, 26, 39, 8, 19, 42, 22, 47, 28, 25, 13, 37}
 
-	winnerDeck := combat(player1, player2)
-	fmt.Println("Winner score of simple combat:", score(winnerDeck))
+	winner, winnerDeck := combat(player1, player2)
+	fmt.Println("Winner of crab combat:", winner)
+	fmt.Println("Winner's deck:", winnerDeck)
+	fmt.Println("Winner's score:", score(winnerDeck))
 	fmt.Println()
 
-	winner, winnerDeck := recursiveCombat(player1, player2)
+	winner, winnerDeck = recursiveCombat(player1, player2)
 	fmt.Println("Winner of recursive combat:", winner)
 	fmt.Println("Winner's deck:", winnerDeck)
 	fmt.Println("Winner's score:", score(winnerDeck))
-
 }
