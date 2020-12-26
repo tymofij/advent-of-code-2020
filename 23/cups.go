@@ -5,11 +5,11 @@ import (
 	"strconv"
 )
 
-// func log(args ...interface{}) {
-// 	if debug {
-// 		fmt.Println(args...)
-// 	}
-// }
+func log(args ...interface{}) {
+	if debug {
+		fmt.Println(args...)
+	}
+}
 
 type node struct {
 	val  int
@@ -21,6 +21,7 @@ func makeCups(s string, size int) *node {
 	for _, c := range s {
 		v, _ := strconv.Atoi(string(c))
 		cur = &node{v, nil}
+		cupCache[v] = cur
 		if start == nil {
 			start = cur
 		}
@@ -31,6 +32,7 @@ func makeCups(s string, size int) *node {
 	}
 	for i := 10; i <= size; i++ {
 		cur = &node{i, nil}
+		cupCache[i] = cur
 		prev.next = cur
 		prev = cur
 	}
@@ -70,14 +72,6 @@ func getDestVal(val int, excluded *node) int {
 	return n
 }
 
-func getNode(val int, start *node) *node {
-	res := start
-	for res.val != val {
-		res = res.next
-	}
-	return res
-}
-
 func insertThreeAfter(start, three *node) {
 	afterStart := start.next
 	three.next.next.next = afterStart
@@ -85,7 +79,7 @@ func insertThreeAfter(start, three *node) {
 }
 
 func strWithoutOne(start *node) string {
-	one := getNode(1, start)
+	one := cupCache[1]
 	cur := one.next
 	res := ""
 	for cur != one {
@@ -95,11 +89,11 @@ func strWithoutOne(start *node) string {
 	return res
 }
 
-const nCups = 9
-const nMoves = 100
+// const nCups = 9
+// const nMoves = 100
 
-// const nCups = 1_000_000
-// const nMoves = 10_000_000
+const nCups = 1_000_000
+const nMoves = 10_000_000
 
 var debug bool = false
 var cupCache [nCups + 1]*node
@@ -117,18 +111,15 @@ func main() {
 		// log("pick up:", three.val, three.next.val, three.next.next.val)
 		destVal := getDestVal(cups.val, three)
 		// log("destination:", destVal)
-		destNode := getNode(destVal, cups)
+		destNode := cupCache[destVal]
 		insertThreeAfter(destNode, three)
 		cups = cups.next
-		// log()
-		if move%1000 == 0 {
-			fmt.Println(move)
-		}
+		// fmt.log()
 	}
 	if nCups < 10 {
 		fmt.Println("Cups:", strWithoutOne(cups))
 	}
-	one := getNode(1, cups)
+	one := cupCache[1]
 	fmt.Println("Numbers after one:", one.next.val, one.next.next.val)
 	fmt.Println("Multiple:", one.next.val*one.next.next.val)
 }
