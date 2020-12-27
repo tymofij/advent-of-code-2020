@@ -1,5 +1,4 @@
 import operator
-from pprint import pprint
 from functools import reduce
 from collections import defaultdict, Counter
 
@@ -31,6 +30,7 @@ while len(solved) != len(notices):
             food = notices[allergen].pop()
             solved[food] = allergen
 
-pprint(solved)
-pprint(counter)
-print(sum([v for (k, v) in counter.items() if k not in solved]))
+print("Occurences of safe ingredients:", sum([v for (k, v) in counter.items() if k not in solved]))
+print("Canonical dangerous ingredient list:",
+    ",".join([food for (food, allergen) in  sorted(solved.items(), key=lambda e: e[1])])
+)
