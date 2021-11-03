@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"strconv"
+
+	"test18/a/reader"
 )
 
 func do(a, b int, op rune) int {
@@ -58,15 +60,11 @@ func SimpleCalc(s string) int {
 	return res
 }
 
-type LineReader interface {
-	ReadLines() []string
-}
-
 type CalcLinesSum struct {
-	reader LineReader
+	reader reader.LineReader
 }
 
-func NewCalcLinesSum(r LineReader) CalcLinesSum {
+func NewCalcLinesSum(r reader.LineReader) CalcLinesSum {
 	return CalcLinesSum{reader: r}
 }
 

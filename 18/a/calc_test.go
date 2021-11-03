@@ -2,6 +2,10 @@ package main
 
 import (
 	"testing"
+
+	"test18/a/mock_reader"
+
+	"github.com/golang/mock/gomock"
 )
 
 func TestSimpleCalc(t *testing.T) {
@@ -61,6 +65,22 @@ func TestCalcSum(t *testing.T) {
 	calculator := NewCalcLinesSum(stubreader)
 	result := calculator.calculate()
 	expected := 11
+	if result != expected {
+		t.Errorf("Got %d, expected %d", result, expected)
+	}
+}
+
+// mockgen -source=./reader/types.go -destination=./mock_reader/reader.go
+
+func TestCalcSumMocked(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
+	mockReader := mock_reader.NewMockLineReader(mockCtrl)
+	mockReader.EXPECT().ReadLines().Return([]string{"2+2"}).Times(1)
+	calculator := NewCalcLinesSum(mockReader)
+	result := calculator.calculate()
+	expected := 4
 	if result != expected {
 		t.Errorf("Got %d, expected %d", result, expected)
 	}
