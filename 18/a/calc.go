@@ -2,9 +2,7 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"strconv"
-	"strings"
 )
 
 func do(a, b int, op rune) int {
@@ -60,14 +58,29 @@ func SimpleCalc(s string) int {
 	return res
 }
 
-func main() {
-	data, _ := ioutil.ReadFile("../input.txt")
-	text := strings.TrimSpace(string(data))
-	lines := strings.Split(text, "\n")
+type LineReader interface {
+	ReadLines() []string
+}
 
+type CalcLinesSum struct {
+	reader LineReader
+}
+
+func NewCalcLinesSum(r LineReader) CalcLinesSum {
+	return CalcLinesSum{reader: r}
+}
+
+func (c CalcLinesSum) calculate() int {
+	lines := c.reader.ReadLines()
 	s := 0
 	for _, line := range lines {
 		s += SimpleCalc(line)
 	}
-	fmt.Println(s)
+	return s
+}
+
+func main() {
+	filereader := FileReader{filename: "../input.txt"}
+	calculator := NewCalcLinesSum(filereader)
+	fmt.Println(calculator.calculate())
 }
