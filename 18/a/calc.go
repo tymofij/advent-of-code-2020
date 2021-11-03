@@ -33,7 +33,10 @@ func findMatchingBracketPos(runes []rune, startPos int) int {
 	return -1
 }
 
-func simpleCalc(s string) int {
+// calculate the arithmentic expression,
+// but addition and multiplication have SAME level of precedence
+// except when there are parentheses. Parentheses still matter.
+func SimpleCalc(s string) int {
 	runes := []rune(s)
 	res := 0
 	op := '+'
@@ -50,7 +53,7 @@ func simpleCalc(s string) int {
 		if c == '(' {
 			closing := findMatchingBracketPos(runes, i)
 			insideExpr := string(runes[i+1 : closing])
-			res = do(res, simpleCalc(insideExpr), op)
+			res = do(res, SimpleCalc(insideExpr), op)
 			i = closing
 		}
 	}
@@ -64,7 +67,7 @@ func main() {
 
 	s := 0
 	for _, line := range lines {
-		s += simpleCalc(line)
+		s += SimpleCalc(line)
 	}
 	fmt.Println(s)
 }
