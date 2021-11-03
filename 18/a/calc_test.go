@@ -4,13 +4,11 @@ import (
 	"testing"
 )
 
-type testCase struct {
-	input    string
-	expected int
-}
-
 func TestSimpleCalc(t *testing.T) {
-	cases := []testCase{
+	cases := []struct {
+		input    string
+		expected int
+	}{
 		{
 			input:    "2 * 3",
 			expected: 6,
@@ -37,12 +35,15 @@ func TestSimpleCalc(t *testing.T) {
 		},
 	}
 
-	var result int
 	for _, c := range cases {
-		result = SimpleCalc(c.input)
-		if result != c.expected {
-			t.Errorf("Got %d, expected %d", result, c.expected)
-		}
+		t.Run(c.input, func(t *testing.T) {
+			result := SimpleCalc(c.input)
+			if result != c.expected {
+				t.Errorf("Got %d, expected %d", result, c.expected)
+			}
+		})
 	}
+
+	// subtests for input having 2 can be run with `go test -v -run "TestSimpleCalc/2`
 
 }
