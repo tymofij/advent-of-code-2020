@@ -8,6 +8,37 @@ import (
 	"github.com/golang/mock/gomock"
 )
 
+func TestBracketPos(t *testing.T) {
+	cases := []struct {
+		s        string
+		startPos int
+		expected int
+	}{{
+		s:        "()",
+		startPos: 0,
+		expected: 1,
+	},
+		{
+			s:        "x(4+5)",
+			startPos: 1,
+			expected: 5,
+		},
+		{
+			s:        "x((1))",
+			startPos: 1,
+			expected: 5,
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.s, func(t *testing.T) {
+			result := findMatchingBracketPos([]rune(c.s), c.startPos)
+			if result != c.expected {
+				t.Errorf("Got %d, expected %d", result, c.expected)
+			}
+		})
+	}
+}
+
 func TestSimpleCalc(t *testing.T) {
 	cases := []struct {
 		input    string
@@ -16,6 +47,10 @@ func TestSimpleCalc(t *testing.T) {
 		{
 			input:    "2 * 3",
 			expected: 6,
+		},
+		{
+			input:    "2 + 3",
+			expected: 5,
 		},
 		{
 			input:    "1 + 2 * 3 + 4 * 5 + 6",
